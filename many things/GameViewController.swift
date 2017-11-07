@@ -77,8 +77,9 @@ class GameViewController: NSViewController {
             
             let obj = SCNNode(geometry: geometry)
         
-            obj.position.x = CGFloat(index * 20);
+            obj.position.x = CGFloat(index * 19);
             scene.rootNode.addChildNode(obj)
+            print("test")
         }
     }
     
@@ -115,6 +116,6 @@ class GameViewController: NSViewController {
             materials.append(material)
         }
     }
-    
+    //this is an example comment.
   
 }
