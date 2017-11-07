@@ -10,12 +10,15 @@ import SceneKit
 import QuartzCore
 
 class GameViewController: NSViewController {
+    var scene: SCNScene!
+    
+    var materials: [SCNMaterial]!
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         // create a new scene
-        let scene = SCNScene(named: "art.scnassets/ship.scn")!
+        scene = SCNScene(named: "art.scnassets/ship.scn")!
         
         // create and add a camera to the scene
         let cameraNode = SCNNode()
@@ -41,7 +44,10 @@ class GameViewController: NSViewController {
         
         // retrieve the ship node
         let ship = scene.rootNode.childNode(withName: "ship", recursively: true)!
-        
+       let mat = SCNMaterial();
+        mat.diffuse.contents = NSColor.blue
+        mat.isLitPerPixel = false;
+        ship.geometry?.materials = [mat]
         // animate the 3d object
         ship.runAction(SCNAction.repeatForever(SCNAction.rotateBy(x: 0, y: 2, z: 0, duration: 1)))
         
@@ -59,47 +65,56 @@ class GameViewController: NSViewController {
         
         // configure the view
         scnView.backgroundColor = NSColor.black
-        
-        // Add a click gesture recognizer
-        let clickGesture = NSClickGestureRecognizer(target: self, action: #selector(handleClick(_:)))
-        var gestureRecognizers = scnView.gestureRecognizers
-        gestureRecognizers.insert(clickGesture, at: 0)
-        scnView.gestureRecognizers = gestureRecognizers
+        manythings()
     }
     
-    @objc
-    func handleClick(_ gestureRecognizer: NSGestureRecognizer) {
-        // retrieve the SCNView
-        let scnView = self.view as! SCNView
+    func manythings(){
+        loadMaterials()
+        for index in 1...9{
+            let random = arc4random_uniform(10)
+            let geometry = SCNSphere(radius: CGFloat(random))
+            geometry.firstMaterial = materials[index-1]
+            
+            let obj = SCNNode(geometry: geometry)
         
-        // check what nodes are clicked
-        let p = gestureRecognizer.location(in: scnView)
-        let hitResults = scnView.hitTest(p, options: [:])
-        // check that we clicked on at least one object
-        if hitResults.count > 0 {
-            // retrieved the first clicked object
-            let result = hitResults[0]
-            
-            // get its material
-            let material = result.node.geometry!.firstMaterial!
-            
-            // highlight it
-            SCNTransaction.begin()
-            SCNTransaction.animationDuration = 0.5
-            
-            // on completion - unhighlight
-            SCNTransaction.completionBlock = {
-                SCNTransaction.begin()
-                SCNTransaction.animationDuration = 0.5
-                
-                material.emission.contents = NSColor.black
-                
-                SCNTransaction.commit()
-            }
-            
-            material.emission.contents = NSColor.red
-            
-            SCNTransaction.commit()
+            obj.position.x = CGFloat(index * 20);
+            scene.rootNode.addChildNode(obj)
         }
     }
+    
+    func loadMaterials(){
+        materials = []
+        for index in 1...9{
+            let material =  SCNMaterial()
+            let name: String
+            
+            switch index {
+            case 1:
+                name = "mercury"
+            case 2:
+                name = "venus"
+            case 3:
+                name = "earth"
+            case 4:
+                name = "mars"
+            case 5:
+                name = "jupiter"
+            case 6:
+                name = "saturn"
+            case 7:
+                name = "uranus"
+            case 8:
+                name = "neptune"
+            case 9:
+                name = "pluto"
+            default:
+                name = "earth"
+            }
+            
+            material.diffuse.contents = NSImage(imageLiteralResourceName: name)
+            materials.append(material)
+        }
+    }
+    
+  
 }
